@@ -16,8 +16,11 @@ import (
 var inputFile = flag.String("infile", "enwiki-latest-pages-articles.xml", "Input file path")
 var indexFile = flag.String("indexfile", "out/article_list.txt", "article list output file")
 
-var filter, _ = regexp.Compile("^file:.*|^talk:.*|^special:.*|^wikipedia:.*|^wiktionary:.*|^user:.*|^user_talk:.*")
+var filter, err = regexp.Compile("^file:.*|^talk:.*|^special:.*|^wikipedia:.*|^wiktionary:.*|^user:.*|^user_talk:.*")
 
+if (err != nil) {
+	panic(err.Error())
+}
 // Here is an example article from the Wikipedia XML dump
 //
 // <page>
@@ -80,7 +83,10 @@ func main() {
 	var inElement string
 	for {
 		// Read tokens from the XML document in a stream.
-		t, _ := decoder.Token()
+		t, err := decoder.Token()
+		if (err != nil) {
+			panic(err.Error())
+		}
 		if t == nil {
 			break
 		}
@@ -94,8 +100,10 @@ func main() {
 				var p Page
 				// decode a whole chunk of following XML into the
 				// variable p which is a Page (se above)
-				decoder.DecodeElement(&p, &se)
-
+				err := decoder.DecodeElement(&p, &se)
+				if (err != nil) {
+					panic(err.Error())
+				}
 				// Do some stuff with the page.
 				p.Title = CanonicalizeTitle(p.Title)
 				m := filter.MatchString(p.Title)
